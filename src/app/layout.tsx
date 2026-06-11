@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>{nonce ? <meta property="csp-nonce" nonce={nonce} /> : null}</head>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <SiteHeader />
+        {children}
+      </body>
     </html>
   );
 }
