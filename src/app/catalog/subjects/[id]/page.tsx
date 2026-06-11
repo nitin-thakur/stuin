@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { Breadcrumbs, CardLink, EmptyState, PageHeader } from "@/components/ui";
 import { getSemester, getSubject, listExperiments } from "@/lib/catalog";
+import { getCurrentUser } from "@/lib/auth/session";
+import { listManualsForSubject } from "@/lib/manuals";
+import ManualUpload from "@/components/ManualUpload";
+import ManualList from "@/components/ManualList";
 
 export default async function SubjectPage({
   params,
@@ -11,9 +16,11 @@ export default async function SubjectPage({
   const subject = await getSubject(id);
   if (!subject) notFound();
 
-  const [semester, experiments] = await Promise.all([
+  const [semester, experiments, user, manuals] = await Promise.all([
     getSemester(subject.semester_id),
     listExperiments(id),
+    getCurrentUser(),
+    listManualsForSubject(id),
   ]);
 
   return (
@@ -50,6 +57,24 @@ export default async function SubjectPage({
               />
             ))}
           </div>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold">Lab Manuals</h2>
+        <ManualList manuals={manuals} />
+        {user ? (
+          <ManualUpload subjectId={subject.id} />
+        ) : (
+          <p className="text-sm text-slate-500">
+            <Link
+              href={`/login?next=${encodeURIComponent(`/catalog/subjects/${subject.id}`)}`}
+              className="underline"
+            >
+              Sign in
+            </Link>{" "}
+            to upload a lab manual.
+          </p>
         )}
       </section>
     </main>
